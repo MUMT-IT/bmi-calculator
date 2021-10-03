@@ -1,24 +1,39 @@
 import math
-from tkinter import messagebox
 import openpyxl
 from openpyxl import Workbook
 import datetime
 from tkinter import*
-from tkinter.messagebox import askyesno
+from tkinter import messagebox
+from tkinter.messagebox import ERROR, askyesno
 
 root = Tk()
 
 root.title("BMI calculator")
-root.geometry("500x500")
-nameInput = StringVar()
-weightInput = IntVar()
-heightInput = IntVar()
-userNameLabel = Label(text = "ชื่อผู้ใช้").grid(row=0,column=0)
-userNameEntry = Entry(width = 30,textvariable=nameInput).grid(row=0,column=1)
-weightLabel = Label(text = "น้ำหนัก(กก.)").grid(row=1,column=0)
-weightEntry = Entry(width = 30,textvariable=weightInput).grid(row=1,column=1)
-heightLabel = Label(text="ส่วนสูง(ซม.)").grid(row=2,column=0)
-heightEntry = Entry(width = 30,textvariable=heightInput).grid(row=2,column=1)
+root.geometry("800x500")
+
+userNameInput = StringVar()
+weightInput = DoubleVar()
+heightInput = DoubleVar()
+
+
+userNameLabel = Label(root,text = "ชื่อผู้ใช้งาน")
+userNameEntry = Entry(root,width = 20 ,textvariable=userNameInput)
+weightLabel = Label(root,text = "น้ำหนัก(กก.)")
+weightEntry = Entry(root,width = 20,textvariable=weightInput)
+heightLabel = Label(root,text="ส่วนสูง(ซม.)")
+heightEntry = Entry(root,width = 20,textvariable=heightInput)
+
+userName = userNameInput.get()
+weight = weightInput.get()
+height = heightInput.get()
+
+
+userNameLabel.grid(row=0,column=0)
+userNameEntry.grid(row=0,column=1)
+weightLabel.grid(row=1,column=0)
+weightEntry.grid(row=1,column=1)
+heightLabel.grid(row=2,column=0)
+heightEntry.grid(row=2,column=1)
 
 
 #------------------------Prepare database-----------------------
@@ -26,91 +41,135 @@ heightEntry = Entry(width = 30,textvariable=heightInput).grid(row=2,column=1)
 filePath = "C:/Users/Peerapat/Desktop/bmi-calculator/Database.xlsx"
 wb = openpyxl.load_workbook(filePath)
 
-
-#---------------------------------------------------------------
-
 #--------------Check for existing name in database--------------
-def checkName() :
-	sheetNames = wb.sheetnames
-	existingName = 0
-	name = nameInput.get()
-	if len(name) == 0:
-		messagebox.showerror("Error","กรุณากรอกชิ่อผู้ใช้งาน")
-	else :	
-		for x in range(len(sheetNames)):
-			if name == sheetNames[x] :
-				existingName +=1
 
-		if existingName > 0 :
-			ws = wb[name]
-		else :
-			confirm = askyesno(title = "Confirmation",message=f"ไม่พบชื่อผู้ใช้งาน {name} ต้องการสร้างรายชื่อใหม่หรือไม่")
-			if confirm :
-				ws = wb.create_sheet(name)
-				ws['A1'] = name
-				ws['A2'] = 'Time'
-				ws['B2'] = 'Weight'
-				ws['C2'] = 'Height'
-				ws['D2'] = 'BMI'
-				wb.save(filePath)
-			else :
-				pass
-		return ws
-#---------------------------------------------------------------
+def checkUserName():
+	userName = userNameInput.get()
+	userNameList = wb.sheetnames
+	if userName != '' :
+		if userName in userNameList :
+			return True
+		else:
+			messagebox.showerror('Error',f'ไม่พบชื่อผู้ใช้งาน {userName}')
+			return False
+	else:
+		messagebox.showerror('Error',"กรุณากรอกชิ่อผู้ใช้งาน")
+
+def createNewUserName():
+	userName = userNameInput.get()
+	if userName != '':
+			if  checkUserName():
+				messagebox.showerror('Error',f"ชื่อผู้ใช้งาน {userName} มีอยู่แล้ว")
+			else:
+				confirm = askyesno(title = "Confirmation",message=f"ต้องการสร้างชื่อผู้ใช้งาน {userName} หรือไม่")
+				if confirm :
+					ws = wb.create_sheet(userName)
+					ws['A1'] = userName
+					ws['A2'] = 'เวลา'
+					ws['B2'] = 'น้ำหนัก(กก.)'
+					ws['C2'] = 'ส่วนสูง(ซม.)'
+					ws['D2'] = 'BMI'
+					ws['E2'] = 'เกณฑ์'
+					wb.save(filePath)
+	else :
+		messagebox.showerror("Error","กรุณากรอกชิ่อผู้ใช้งาน")
+
+def validateInput():
+	try:
+		weight = weightInput.get()
+	except :
+		messagebox.showerror("Error","กรุณากรอกน้ำหนักเป็นตัวเลข")
+	try:
+		height = heightInput.get()
+	except :
+		messagebox.showerror("Error","กรุณากรอกส่วนสูงเป็นตัวเลข")
+
+	if weight == 0 or weight is None or weight == '':
+		messagebox.showerror("Error","กรุณากรอกข้อมูลน้ำหนัก")
+	if height == 0 or height is None or height == '':
+		messagebox.showerror("Error","กรุณากรอกข้อมูลส่วนสูง")
+	if type(weight) is float and type(height) is float:
+		if weight > 0 and height > 0 :
+			return True
+
+def BMIresult(BMI):
+	if BMI < 18.5 :
+		result = "ผอม"
+	elif 18.5 <= BMI < 22.9 :
+		result = "สุขภาพดี"
+	elif 22.9 <= BMI < 24.9 :
+		result = "ท้วม"
+	elif 24.9 <= BMI < 29.9 :
+		result = "อ้วน"
+	elif 29.9 <= BMI:
+		result = "อ้วนมาก"
+	return result
 
 def calculateBMI():
-	height = heightInput.get()
-	weight = weightInput.get()
+	if validateInput():
+		height = heightInput.get()
+		weight = weightInput.get()
+		height2 = math.pow(float(height)/100, 2)
+		BMI = round(float(weight)/height2,2)
+		result = BMIresult(BMI)
+		resultLabel = Label(root,width = 20,text=f"BMI {BMI} {result}")
+		resultLabel.grid(row=6,column=1)
+		return BMI
 
-	
-	ws = checkName()
-	if weight == 0 :
-		messagebox.showerror("Error","กรุณากรอกข้อมูลน้ำหนัก")
-	if type(weight) != int :
-		messagebox.showerror("Error","กรุณากรอกข้อมูลน้ำหนักเป็นตัวเลข")
-	if height == 0 :
-		messagebox.showerror("Error","กรุณากรอกข้อมูลความสูง")
-	if type(height) != int :
-		messagebox.showerror("Error","กรุณากรอกข้อมูลความสูงเป็นตัวเลข")
-
-	if weight != 0 and type(weight) == int and height != 0 and type(height) == int:
-		height2 = math.pow(height/100, 2)
-		BMI = round(weight/height2,2)
-		resultLabel = Label(text=f"BMI ของคุณคือ {BMI}").grid(row=4,column=0)
-		maxRow = ws.max_row+1
-		date = datetime.datetime.now()
-		ws.cell(maxRow,1).value = date.strftime('%d/%m/%Y %H:%M')
-		ws.cell(maxRow,2).value = weight
-		ws.cell(maxRow,3).value = height
-		ws.cell(maxRow,4).value = BMI
-		wb.save(filePath)
+def recordData():
+	if checkUserName():
+		if validateInput():
+			userName = userNameInput.get()
+			height = heightInput.get()
+			weight = weightInput.get()
+			ws = wb[userName]
+			BMI = calculateBMI()
+			result = BMIresult(BMI)
+			maxRow = ws.max_row+1
+			date = datetime.datetime.now()
+			ws.cell(maxRow,1).value = date.strftime('%d/%m/%Y %H:%M')
+			ws.cell(maxRow,2).value = weight
+			ws.cell(maxRow,3).value = height
+			ws.cell(maxRow,4).value = BMI
+			ws.cell(maxRow,5).value = result
+			wb.save(filePath)
 
 def showData():
-	ws = checkName()
-	maxRow = ws.max_row+1
-	#headerLabel1 = Label(text="เวลา").grid(row=4,column=1)
-	#headerLabel2 = Label(text="น้ำหนัก").grid(row=4,column=2)
-	#headerLabel3 = Label(text="ส่วนสูง").grid(row=4,column=3)
-	#headerLabel4 = Label(text="BMI").grid(row=4,column=4)
-	for row in range(2,maxRow):
-		for col in range(1,5):
-			dataLabel = Label(text=ws.cell(row,col).value).grid(row=row+3,column=col-1)
-			print(type(dataLabel))
-	clearBtn = Button(root,text="ล้างข้อมูล",command= lambda : clearData ).grid(row=3,column=2)
+	userName = userNameInput.get()
+	if checkUserName():
+		ws = wb[userName]
+		maxRow = ws.max_row+1
+		for row in range(2,maxRow):
+			for col in range(1,5):
+				dataLabel = Label(root,text=ws.cell(row,col).value)
+				dataLabel.grid(row=row+4,column=col-1)
 
+def deleteUser():
+	userName = userNameInput.get()
+	if checkUserName():
+		ws = wb[userName]
+		confirm = askyesno(title="Confirmation",message = f"ต้องการลบข้อมูลของ {userName} ?")
+		if confirm :
+			wb.remove(ws)
+			wb.save(filePath)
 
-def clearData():
-	ws = checkName()
-	maxRow = ws.max_row+1
-	ws.delete_rows(3,maxRow)
-	wb.save(filePath)
+def resetForm():
+	userNameEntry.delete(0,'end')
+	weightEntry.delete(0,'end')
+	heightEntry.delete(0,'end')
 
+calBtn = Button(root,width=20,text="คำนวณ BMI",command=calculateBMI)
+newUserBtn = Button(root,width=20,text="สร้างชื่อผู้ใช้ใหม่",command=createNewUserName)
+recBtn = Button(root,width=20,text="บันทึกข้อมูล",command=recordData)
+showBtn = Button(root,width=20,text="เรียกดูข้อมูล",command=showData)
+delBtn = Button(root,width=20,text="ลบข้อมูล",command= deleteUser)
+resetBtn = Button(root,width=20,text="รีเซทฟอร์ม",command=resetForm)
 
-#testLabel = Label(root,text="result").grid(row=3,column=2)
-#testBtn = Button(root,text="Clear",command = lambda : testLabel.destroy()).grid(row=3,column=3)
-calBtn = Button(root,text="คำนวณ BMI",command=calculateBMI).grid(row=3,column=0)
-showBtn = Button(root,text="เรียกดูข้อมูล",command=showData).grid(row=3,column=1)
-
-
+calBtn.grid(row=3,column=0)
+newUserBtn.grid(row=3,column=1)
+recBtn.grid(row=4,column=0)
+showBtn.grid(row=4,column=1)
+resetBtn.grid(row=5,column=0)
+delBtn.grid(row=5,column=1)
 
 root.mainloop()
