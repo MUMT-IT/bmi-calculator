@@ -9,7 +9,7 @@ from tkinter.messagebox import ERROR, askyesno
 root = Tk()
 
 root.title("BMI calculator")
-root.geometry("800x500")
+root.geometry("400x500")
 
 userNameInput = StringVar()
 weightInput = DoubleVar()
@@ -23,18 +23,12 @@ weightEntry = Entry(root,width = 20,textvariable=weightInput)
 heightLabel = Label(root,text="ส่วนสูง(ซม.)")
 heightEntry = Entry(root,width = 20,textvariable=heightInput)
 
-userName = userNameInput.get()
-weight = weightInput.get()
-height = heightInput.get()
-
-
 userNameLabel.grid(row=0,column=0)
 userNameEntry.grid(row=0,column=1)
 weightLabel.grid(row=1,column=0)
 weightEntry.grid(row=1,column=1)
 heightLabel.grid(row=2,column=0)
 heightEntry.grid(row=2,column=1)
-
 
 #------------------------Prepare database-----------------------
 
@@ -77,20 +71,20 @@ def createNewUserName():
 def validateInput():
 	try:
 		weight = weightInput.get()
-	except :
+	except TclError:
 		messagebox.showerror("Error","กรุณากรอกน้ำหนักเป็นตัวเลข")
 	try:
 		height = heightInput.get()
-	except :
+	except TclError:
 		messagebox.showerror("Error","กรุณากรอกส่วนสูงเป็นตัวเลข")
-
 	if weight == 0 or weight is None or weight == '':
 		messagebox.showerror("Error","กรุณากรอกข้อมูลน้ำหนัก")
+		return False
 	if height == 0 or height is None or height == '':
 		messagebox.showerror("Error","กรุณากรอกข้อมูลส่วนสูง")
-	if type(weight) is float and type(height) is float:
-		if weight > 0 and height > 0 :
-			return True
+		return False
+	if type(weight) is float and type(height) is float and weight > 0 and height > 0:
+		return True
 
 def BMIresult(BMI):
 	if BMI < 18.5 :
@@ -140,9 +134,10 @@ def showData():
 		ws = wb[userName]
 		maxRow = ws.max_row+1
 		for row in range(2,maxRow):
-			for col in range(1,5):
+			for col in range(1,6):
 				dataLabel = Label(root,text=ws.cell(row,col).value)
-				dataLabel.grid(row=row+4,column=col-1)
+				dataLabel.grid(row=row+6,column=col-1)
+	
 
 def deleteUser():
 	userName = userNameInput.get()
