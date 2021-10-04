@@ -2,58 +2,67 @@ import math
 import openpyxl
 from openpyxl import Workbook
 import datetime
+from pathlib import Path
 from tkinter import*
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter.messagebox import ERROR, askyesno
 
+height = 150
 root = Tk()
-
-root.title("BMI calculator")
-root.geometry("400x500")
-
+root.title("BMI calculator by Peerapat Boonyopakorn")
+root.geometry(f"420x{height}")
 userNameInput = StringVar()
 weightInput = DoubleVar()
 heightInput = DoubleVar()
 
+dataInputFrame = Frame(root)
+dataInputFrame.grid(row=0,column=0,rowspan=3,columnspan=2,sticky=EW)
 
-userNameLabel = Label(root,text = "ชื่อผู้ใช้งาน")
-userNameEntry = Entry(root,width = 20 ,textvariable=userNameInput)
-weightLabel = Label(root,text = "น้ำหนัก(กก.)")
-weightEntry = Entry(root,width = 20,textvariable=weightInput)
-heightLabel = Label(root,text="ส่วนสูง(ซม.)")
-heightEntry = Entry(root,width = 20,textvariable=heightInput)
+resultFrame = Frame(root,bd=1,relief='solid',height = 145,width = 180 )
+resultFrame.grid(row=0,column=2,rowspan=6,sticky=EW,padx = 5)
 
-userNameLabel.grid(row=0,column=0)
-userNameEntry.grid(row=0,column=1)
-weightLabel.grid(row=1,column=0)
-weightEntry.grid(row=1,column=1)
-heightLabel.grid(row=2,column=0)
-heightEntry.grid(row=2,column=1)
+userNameLabel = Label(dataInputFrame,width =10,text = "ชื่อผู้ใช้งาน")
+userNameEntry = Entry(dataInputFrame,textvariable=userNameInput)
+weightLabel = Label(dataInputFrame,width = 10,text = "น้ำหนัก(กก.)")
+weightEntry = Entry(dataInputFrame,textvariable=weightInput)
+heightLabel = Label(dataInputFrame,width = 10, text="ส่วนสูง(ซม.)")
+heightEntry = Entry(dataInputFrame,textvariable=heightInput)
 
+userNameLabel.grid(row=0,column=0,sticky=W)
+userNameEntry.grid(row=0,column=1,sticky=E)
+weightLabel.grid(row=1,column=0,sticky=W)
+weightEntry.grid(row=1,column=1,sticky=E)
+heightLabel.grid(row=2,column=0,sticky=W)
+heightEntry.grid(row=2,column=1,sticky=E)
+
+BMIHeading = Label(resultFrame)
+BMILabel = Label(resultFrame)
+resultLabel = Label(resultFrame)
+
+dataList = []
+dataFrame = Frame(root)
+dataScroll = Scrollbar(dataFrame)
 
 
 columns = ('#1','#2','#3','#4','#5')
-dataTreeview = ttk.Treeview(root,columns=columns,show='headings')
+dataTreeview = ttk.Treeview(dataFrame,columns=columns,show='headings',yscrollcommand = dataScroll.set,)
 dataTreeview.column('#0',width=0,stretch=NO)
-dataTreeview.column('#1',width=100,anchor=CENTER)
-dataTreeview.column('#2',width=60,anchor=CENTER)
-dataTreeview.column('#3',width=60,anchor=CENTER)
-dataTreeview.column('#4',width=60,anchor=CENTER)
-dataTreeview.column('#5',width=60,anchor=CENTER)
+dataTreeview.column('#1',width=135,anchor=CENTER)
+dataTreeview.column('#2',width=62,anchor=CENTER)
+dataTreeview.column('#3',width=62,anchor=CENTER)
+dataTreeview.column('#4',width=62,anchor=CENTER)
+dataTreeview.column('#5',width=62,anchor=CENTER)
 
 dataTreeview.heading('#1',text='เวลา')
 dataTreeview.heading('#2',text='น้ำหนัก')
 dataTreeview.heading('#3',text='ส่วนสูง')
 dataTreeview.heading('#4',text='BMI')
 dataTreeview.heading('#5',text='เกณฑ์')
-dataList = []
-#------------------------Prepare database-----------------------
 
-filePath = "C:/Users/Peerapat/Desktop/bmi-calculator/BMI_Caculator Desktop App/Database.xlsx"
+
+filePath = ("./Database/Database.xlsx")
 wb = openpyxl.load_workbook(filePath)
-
-#--------------Check for existing name in database--------------
 
 def checkUserName():
 	userName = userNameInput.get()
@@ -125,11 +134,15 @@ def calculateBMI():
 	if validateInput():
 		height = heightInput.get()
 		weight = weightInput.get()
-		height2 = math.pow(float(height)/100, 2)
-		BMI = round(float(weight)/height2,2)
+		height2 = math.pow(height/100, 2)
+		BMI = round(weight/height2,2)
 		result = BMIresult(BMI)
-		resultLabel = Label(root,width = 20,text=f"BMI {BMI} {result}")
-		resultLabel.grid(row=6,column=1)
+		BMIHeading = Label(resultFrame,text = "BMI ของคุณคือ",font=20,anchor=CENTER)
+		BMILabel = Label(resultFrame,text=f"{BMI}",font=('Heleventica Bold',50),anchor=CENTER)
+		resultLabel = Label(resultFrame,text=f"อยู่ในเกณฑ์ {result}",font=20,anchor=CENTER)
+		BMIHeading.grid(row = 0,column = 0)
+		BMILabel.grid(row=1,column = 0,rowspan = 4)
+		resultLabel.grid(row = 5,column = 0)
 		return BMI
 
 def recordData():
@@ -154,8 +167,6 @@ def recordData():
 				dataTreeview.insert('',END,values=(shortDate,weight,height,BMI,result))
 			wb.save(filePath)
 
-
-
 def showData():
 	if len(dataList) != 0:
 		for data in dataTreeview.get_children():
@@ -168,9 +179,13 @@ def showData():
 		for row in range(3,maxRow):
 			dataList.append((ws.cell(row,1).value,ws.cell(row,2).value,ws.cell(row,3).value,ws.cell(row,4).value,ws.cell(row,5).value))
 		for data in dataList:
-			dataTreeview.insert('',END,values=data)	
-		dataTreeview.grid(row=7,column=1)
-		
+			dataTreeview.insert('',END,values=data)
+		dataFrame.grid(row=7,column=0,columnspan=3,padx=10,pady=10,sticky=EW)	
+		dataTreeview.grid(row=0,column=0,sticky=NSEW)
+		dataScroll.grid(row=0,column=1,sticky='NS',pady=10)
+		dataScroll.config(command=dataTreeview.yview)
+		height = 400
+		root.geometry(f"420x{height}")
 
 def deleteUser():
 	userName = userNameInput.get()
@@ -181,24 +196,32 @@ def deleteUser():
 			wb.remove(ws)
 			wb.save(filePath)
 			if len(dataList) != 0:
-				dataTreeview.destroy()
+				dataTreeview.grid_forget()
 				dataList.clear()
+				height = 150
+				root.geometry(f"420x{height}")
+	for widget in resultFrame.winfo_children():
+		widget.grid_forget()
+
 
 def resetForm():
 	userNameEntry.delete(0,'end')
 	weightEntry.delete(0,'end')
 	heightEntry.delete(0,'end')
+	for widget in resultFrame.winfo_children():
+		widget.grid_forget()
 	if len(dataList) != 0:
-		dataTreeview.destroy()
+		dataTreeview.grid_forget()
 		dataList.clear()
+		height = 150
+		root.geometry(f"420x{height}")
 
-
-calBtn = Button(root,width=20,text="คำนวณ BMI",command=calculateBMI)
-newUserBtn = Button(root,width=20,text="สร้างชื่อผู้ใช้ใหม่",command=createNewUserName)
-recBtn = Button(root,width=20,text="บันทึกข้อมูล",command=recordData)
-showBtn = Button(root,width=20,text="เรียกดูข้อมูล",command=showData)
-delBtn = Button(root,width=20,text="ลบข้อมูล",command= deleteUser)
-resetBtn = Button(root,width=20,text="รีเซทฟอร์ม",command=resetForm)
+calBtn = Button(root,width=15,text="คำนวณ BMI",command=calculateBMI)
+newUserBtn = Button(root,width=15,text="สร้างชื่อผู้ใช้ใหม่",command=createNewUserName)
+recBtn = Button(root,width=15,text="บันทึกข้อมูล",command=recordData)
+showBtn = Button(root,width=15,text="เรียกดูข้อมูล",command=showData)
+delBtn = Button(root,width=15,text="ลบข้อมูล",command= deleteUser)
+resetBtn = Button(root,width=15,text="รีเซทฟอร์ม",command=resetForm)
 
 calBtn.grid(row=3,column=0)
 newUserBtn.grid(row=3,column=1)
