@@ -4,6 +4,7 @@ from openpyxl import Workbook
 import datetime
 from tkinter import*
 from tkinter import messagebox
+from tkinter import ttk
 from tkinter.messagebox import ERROR, askyesno
 
 root = Tk()
@@ -30,9 +31,26 @@ weightEntry.grid(row=1,column=1)
 heightLabel.grid(row=2,column=0)
 heightEntry.grid(row=2,column=1)
 
+
+
+columns = ('#1','#2','#3','#4','#5')
+dataTreeview = ttk.Treeview(root,columns=columns,show='headings')
+dataTreeview.column('#0',width=0,stretch=NO)
+dataTreeview.column('#1',width=100,anchor=CENTER)
+dataTreeview.column('#2',width=60,anchor=CENTER)
+dataTreeview.column('#3',width=60,anchor=CENTER)
+dataTreeview.column('#4',width=60,anchor=CENTER)
+dataTreeview.column('#5',width=60,anchor=CENTER)
+
+dataTreeview.heading('#1',text='เวลา')
+dataTreeview.heading('#2',text='น้ำหนัก')
+dataTreeview.heading('#3',text='ส่วนสูง')
+dataTreeview.heading('#4',text='BMI')
+dataTreeview.heading('#5',text='เกณฑ์')
+dataList = []
 #------------------------Prepare database-----------------------
 
-filePath = "C:/Users/Peerapat/Desktop/bmi-calculator/Database.xlsx"
+filePath = "C:/Users/Peerapat/Desktop/bmi-calculator/BMI_Caculator Desktop App/Database.xlsx"
 wb = openpyxl.load_workbook(filePath)
 
 #--------------Check for existing name in database--------------
@@ -129,15 +147,20 @@ def recordData():
 			wb.save(filePath)
 
 def showData():
+	if len(dataList) != 0:
+		for data in dataTreeview.get_children():
+			dataTreeview.delete(data)
+		dataList.clear()
 	userName = userNameInput.get()
 	if checkUserName():
 		ws = wb[userName]
 		maxRow = ws.max_row+1
-		for row in range(2,maxRow):
-			for col in range(1,6):
-				dataLabel = Label(root,text=ws.cell(row,col).value)
-				dataLabel.grid(row=row+6,column=col-1)
-	
+		for row in range(3,maxRow):
+			dataList.append((ws.cell(row,1).value,ws.cell(row,2).value,ws.cell(row,3).value,ws.cell(row,4).value,ws.cell(row,5).value))
+		for data in dataList:
+			dataTreeview.insert('',END,values=data)	
+		dataTreeview.grid(row=7,column=1)
+		
 
 def deleteUser():
 	userName = userNameInput.get()
@@ -147,11 +170,13 @@ def deleteUser():
 		if confirm :
 			wb.remove(ws)
 			wb.save(filePath)
+			dataTreeview.destroy()
 
 def resetForm():
 	userNameEntry.delete(0,'end')
 	weightEntry.delete(0,'end')
 	heightEntry.delete(0,'end')
+	dataTreeview.destroy()
 
 calBtn = Button(root,width=20,text="คำนวณ BMI",command=calculateBMI)
 newUserBtn = Button(root,width=20,text="สร้างชื่อผู้ใช้ใหม่",command=createNewUserName)
