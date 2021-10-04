@@ -69,10 +69,11 @@ def checkUserName():
 
 def createNewUserName():
 	userName = userNameInput.get()
+	userNameList = wb.sheetnames
 	if userName != '':
-			if  checkUserName():
+			if  userName in userNameList :
 				messagebox.showerror('Error',f"ชื่อผู้ใช้งาน {userName} มีอยู่แล้ว")
-			else:
+			else :
 				confirm = askyesno(title = "Confirmation",message=f"ต้องการสร้างชื่อผู้ใช้งาน {userName} หรือไม่")
 				if confirm :
 					ws = wb.create_sheet(userName)
@@ -85,6 +86,9 @@ def createNewUserName():
 					wb.save(filePath)
 	else :
 		messagebox.showerror("Error","กรุณากรอกชิ่อผู้ใช้งาน")
+	if len(dataList) != 0:
+		dataTreeview.destroy()
+		dataList.clear()
 
 def validateInput():
 	try:
@@ -139,12 +143,18 @@ def recordData():
 			result = BMIresult(BMI)
 			maxRow = ws.max_row+1
 			date = datetime.datetime.now()
-			ws.cell(maxRow,1).value = date.strftime('%d/%m/%Y %H:%M')
+			shortDate = date.strftime('%d/%m/%Y %H:%M')
+			ws.cell(maxRow,1).value = shortDate
 			ws.cell(maxRow,2).value = weight
 			ws.cell(maxRow,3).value = height
 			ws.cell(maxRow,4).value = BMI
 			ws.cell(maxRow,5).value = result
+			if len(dataList) != 0:
+				dataList.append((shortDate,weight,height,BMI,result))
+				dataTreeview.insert('',END,values=(shortDate,weight,height,BMI,result))
 			wb.save(filePath)
+
+
 
 def showData():
 	if len(dataList) != 0:
@@ -170,13 +180,18 @@ def deleteUser():
 		if confirm :
 			wb.remove(ws)
 			wb.save(filePath)
-			dataTreeview.destroy()
+			if len(dataList) != 0:
+				dataTreeview.destroy()
+				dataList.clear()
 
 def resetForm():
 	userNameEntry.delete(0,'end')
 	weightEntry.delete(0,'end')
 	heightEntry.delete(0,'end')
-	dataTreeview.destroy()
+	if len(dataList) != 0:
+		dataTreeview.destroy()
+		dataList.clear()
+
 
 calBtn = Button(root,width=20,text="คำนวณ BMI",command=calculateBMI)
 newUserBtn = Button(root,width=20,text="สร้างชื่อผู้ใช้ใหม่",command=createNewUserName)
