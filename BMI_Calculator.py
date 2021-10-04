@@ -8,10 +8,10 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter.messagebox import ERROR, askyesno
 
-height = 150
+windowHeight = 150
 root = Tk()
 root.title("BMI calculator by Peerapat Boonyopakorn")
-root.geometry(f"420x{height}")
+root.geometry(f"420x{windowHeight}")
 userNameInput = StringVar()
 weightInput = DoubleVar()
 heightInput = DoubleVar()
@@ -22,6 +22,7 @@ dataInputFrame.grid(row=0,column=0,rowspan=3,columnspan=2,sticky=EW)
 resultFrame = Frame(root,bd=1,relief='solid',height = 145,width = 180 )
 resultFrame.grid(row=0,column=2,rowspan=6,sticky=EW,padx = 5)
 
+#Input Section
 userNameLabel = Label(dataInputFrame,width =10,text = "ชื่อผู้ใช้งาน")
 userNameEntry = Entry(dataInputFrame,textvariable=userNameInput)
 weightLabel = Label(dataInputFrame,width = 10,text = "น้ำหนัก(กก.)")
@@ -36,14 +37,15 @@ weightEntry.grid(row=1,column=1,sticky=E)
 heightLabel.grid(row=2,column=0,sticky=W)
 heightEntry.grid(row=2,column=1,sticky=E)
 
+#Result Section
 BMIHeading = Label(resultFrame)
 BMILabel = Label(resultFrame)
 resultLabel = Label(resultFrame)
 
+#Data Section
 dataList = []
 dataFrame = Frame(root)
 dataScroll = Scrollbar(dataFrame)
-
 
 columns = ('#1','#2','#3','#4','#5')
 dataTreeview = ttk.Treeview(dataFrame,columns=columns,show='headings',yscrollcommand = dataScroll.set,)
@@ -60,9 +62,10 @@ dataTreeview.heading('#3',text='ส่วนสูง')
 dataTreeview.heading('#4',text='BMI')
 dataTreeview.heading('#5',text='เกณฑ์')
 
-
+#Load Database
 filePath = ("./Database/Database.xlsx")
 wb = openpyxl.load_workbook(filePath)
+
 
 def checkUserName():
 	userName = userNameInput.get()
@@ -184,8 +187,8 @@ def showData():
 		dataTreeview.grid(row=0,column=0,sticky=NSEW)
 		dataScroll.grid(row=0,column=1,sticky='NS',pady=10)
 		dataScroll.config(command=dataTreeview.yview)
-		height = 400
-		root.geometry(f"420x{height}")
+		windowHeight = 400
+		root.geometry(f"420x{windowHeight}")
 
 def deleteUser():
 	userName = userNameInput.get()
@@ -198,8 +201,8 @@ def deleteUser():
 			if len(dataList) != 0:
 				dataTreeview.grid_forget()
 				dataList.clear()
-				height = 150
-				root.geometry(f"420x{height}")
+				windowHeight = 150
+				root.geometry(f"420x{windowHeight}")
 	for widget in resultFrame.winfo_children():
 		widget.grid_forget()
 
@@ -213,9 +216,10 @@ def resetForm():
 	if len(dataList) != 0:
 		dataTreeview.grid_forget()
 		dataList.clear()
-		height = 150
-		root.geometry(f"420x{height}")
+		windowHeight = 150
+		root.geometry(f"420x{windowHeight}")
 
+#Button Section
 calBtn = Button(root,width=15,text="คำนวณ BMI",command=calculateBMI)
 newUserBtn = Button(root,width=15,text="สร้างชื่อผู้ใช้ใหม่",command=createNewUserName)
 recBtn = Button(root,width=15,text="บันทึกข้อมูล",command=recordData)
