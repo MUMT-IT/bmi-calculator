@@ -1,0 +1,63 @@
+[{
+  "_id": {
+    "$oid": "64bfb93825a2be14b9577cab"
+  },
+  "height": 165,
+  "weight": 65,
+  "bmi": 23.9,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64bfb96025a2be14b9577caf"
+  },
+  "height": 170,
+  "weight": 50,
+  "bmi": 17.3,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64bfd44d25a2be14b9577cb4"
+  },
+  "height": 165,
+  "weight": 55,
+  "bmi": 20.2,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64bfd45825a2be14b9577cb8"
+  },
+  "height": 185,
+  "weight": 55,
+  "bmi": 16.1,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64bfdb2643afc42962f5f0ef"
+  },
+  "height": 154,
+  "weight": 55,
+  "bmi": 23.2,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64bfdb2d43afc42962f5f0f2"
+  },
+  "height": 166,
+  "weight": 78,
+  "bmi": 28.3,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64bfdb4043afc42962f5f0f6"
+  },
+  "height": 172,
+  "weight": 62,
+  "bmi": 21,
+  "__v": 0
+}]
